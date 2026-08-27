@@ -73,6 +73,7 @@ class SentinelVpnService : VpnService() {
             .addAddress(VPN_ADDRESS, 32)
             .addDnsServer(VIRTUAL_DNS)
             .addRoute(VIRTUAL_DNS, 32)
+            .setBlocking(true)
 
         val established = runCatching { builder.establish() }.getOrNull()
         if (established == null) {
