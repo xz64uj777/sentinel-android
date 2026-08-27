@@ -2,13 +2,14 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B1220">
+    android:background="#0B1220"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="22dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -21,80 +22,159 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Android Security Monitor"
-            android:textColor="#CBD5E1"
-            android:textSize="14sp" />
+            android:text="Android Security Monitor • Alpha 0.2"
+            android:textColor="#94A3B8"
+            android:textSize="13sp" />
 
         <TextView
             android:id="@+id/txtScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="26dp"
             android:text="Security Score: --"
             android:textColor="#FFFFFF"
-            android:textSize="24sp"
+            android:textSize="25sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txtThreats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:text="Findings: 0"
-            android:textColor="#E2E8F0" />
+            android:textColor="#E2E8F0"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txtRoot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="15dp"
             android:text="Root: Not scanned"
-            android:textColor="#E2E8F0" />
+            android:textColor="#CBD5E1" />
 
         <TextView
             android:id="@+id/txtDebug"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="7dp"
             android:text="Debugger: Not scanned"
-            android:textColor="#E2E8F0" />
+            android:textColor="#CBD5E1" />
 
         <TextView
             android:id="@+id/txtEmulator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="7dp"
             android:text="Emulator: Not scanned"
-            android:textColor="#E2E8F0" />
+            android:textColor="#CBD5E1" />
+
+        <TextView
+            android:id="@+id/txtFindingsDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="13dp"
+            android:background="#111C2F"
+            android:padding="12dp"
+            android:text="Run a scan to inspect device security signals."
+            android:textColor="#94A3B8"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/btnScan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="26dp"
+            android:layout_marginTop="18dp"
             android:text="RUN SECURITY SCAN" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="26dp"
+            android:background="#233149" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="LOCAL VPN / DNS PROTECTION"
+            android:textColor="#14B8A6"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/txtVpn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="12dp"
             android:text="VPN: INACTIVE"
-            android:textColor="#E2E8F0"
+            android:textColor="#FFFFFF"
+            android:textSize="19sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtVpnMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Mode: MONITOR"
+            android:textColor="#CBD5E1" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchFirewall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Firewall mode (block Sentinel test domains)"
+            android:textColor="#E2E8F0" />
+
+        <TextView
+            android:id="@+id/txtDnsQueries"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="DNS queries observed: 0"
+            android:textColor="#CBD5E1" />
+
+        <TextView
+            android:id="@+id/txtBlocked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Blocked this session: 0"
+            android:textColor="#CBD5E1" />
+
+        <TextView
+            android:id="@+id/txtLastDomain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:ellipsize="middle"
+            android:maxLines="1"
+            android:text="Last domain: —"
+            android:textColor="#CBD5E1" />
 
         <Button
             android:id="@+id/btnVpn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="16dp"
             android:text="START SENTINEL VPN" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Alpha 0.2 routes DNS only. Normal app traffic stays outside the tunnel, preventing the unfinished firewall from breaking internet access. Monitor mode observes domains; Firewall mode also blocks the reserved test domains malware.test, phishing.test, spyware.test and tracker.test."
+            android:textColor="#64748B"
+            android:textSize="11sp" />
 
         <TextView
             android:id="@+id/txtCopyright"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="36dp"
+            android:layout_marginTop="34dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
             android:textColor="#64748B"
             android:textSize="11sp" />
