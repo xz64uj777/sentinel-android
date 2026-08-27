@@ -15,41 +15,77 @@ import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import androidx.core.app.NotificationCompat
 import com.sentinel.security.MainActivity
-import com.sentinel.security.R
 
 class SentinelVpnService : VpnService() {
 
     private var vpnInterface: ParcelFileDescriptor? = null
+    private var dnsProxyLoop: DnsProxyLoop? = null
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        startForeground(1001, buildNotification())
+        startForeground(NOTIFICATION_ID, buildNotification("Starting DNS protection…"))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_STOP -> {
+                stopSelf()
+                return START_NOT_STICKY
+            }
+            ACTION_REFRESH -> {
+                updateNotification()
+                return START_STICKY
+            }
+        }
+
         if (vpnInterface == null) {
-            vpnInterface = Builder()
-                .setSession("Sentinel Security Monitor")
-                .addAddress("10.10.10.2", 24)
-                .addDnsServer("1.1.1.1")
-                .addRoute("0.0.0.0", 0)
-                .setBlocking(false)
-                .establish()
+            startDnsVpn()
+        } else {
+            updateNotification()
         }
         return START_STICKY
     }
 
     override fun onDestroy() {
-        try {
-            vpnInterface?.close()
-        } catch (_: Exception) {
-        }
+        dnsProxyLoop?.stop()
+        dnsProxyLoop = null
+        runCatching { vpnInterface?.close() }
         vpnInterface = null
+        VpnPreferences.setRunning(this, false)
         super.onDestroy()
     }
 
+    override fun onRevoke() {
+        VpnPreferences.setRunning(this, false)
+        stopSelf()
+        super.onRevoke()
+    }
+
     override fun onBind(intent: Intent?): IBinder? = super.onBind(intent)
+
+    private fun startDnsVpn() {
+        VpnPreferences.resetSessionCounters(this)
+
+        val builder = Builder()
+            .setSession("Sentinel DNS Security")
+            .setMtu(1500)
+            .addAddress(VPN_ADDRESS, 32)
+            .addDnsServer(VIRTUAL_DNS)
+            .addRoute(VIRTUAL_DNS, 32)
+
+        val established = runCatching { builder.establish() }.getOrNull()
+        if (established == null) {
+            VpnPreferences.setRunning(this, false)
+            stopSelf()
+            return
+        }
+
+        vpnInterface = established
+        dnsProxyLoop = DnsProxyLoop(this, established).also { it.start() }
+        VpnPreferences.setRunning(this, true)
+        updateNotification()
+    }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -58,17 +94,28 @@ class SentinelVpnService : VpnService() {
                 "Sentinel VPN",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Sentinel local VPN security monitoring"
+                description = "Sentinel on-device DNS security monitoring"
             }
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }
 
-    private fun buildNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
-        .setContentTitle("Sentinel Active")
-        .setContentText("Local VPN security monitoring is running")
+    private fun updateNotification() {
+        val mode = when (VpnPreferences.mode(this)) {
+            VpnMode.MONITOR -> "Monitor mode"
+            VpnMode.FIREWALL -> "Firewall mode"
+        }
+        getSystemService(NotificationManager::class.java)
+            .notify(NOTIFICATION_ID, buildNotification("$mode • DNS protection active"))
+    }
+
+    private fun buildNotification(status: String) = NotificationCompat.Builder(this, CHANNEL_ID)
+        .setContentTitle("Sentinel Android v2")
+        .setContentText(status)
         .setSmallIcon(android.R.drawable.ic_lock_lock)
         .setOngoing(true)
+        .setOnlyAlertOnce(true)
+        .setCategory(NotificationCompat.CATEGORY_SERVICE)
         .setContentIntent(
             PendingIntent.getActivity(
                 this,
@@ -80,6 +127,13 @@ class SentinelVpnService : VpnService() {
         .build()
 
     companion object {
+        const val ACTION_START = "com.sentinel.security.vpn.START"
+        const val ACTION_STOP = "com.sentinel.security.vpn.STOP"
+        const val ACTION_REFRESH = "com.sentinel.security.vpn.REFRESH"
+
         private const val CHANNEL_ID = "sentinel_vpn"
+        private const val NOTIFICATION_ID = 1001
+        private const val VPN_ADDRESS = "10.10.10.2"
+        private const val VIRTUAL_DNS = "10.10.10.1"
     }
 }
