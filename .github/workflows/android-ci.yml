@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: sentinel-android-ci
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,6 +34,13 @@ jobs:
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
 
+      - name: Upload Sentinel debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinel-alpha-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
       - name: Generate Gradle wrapper when missing
         shell: bash
         run: |
@@ -40,12 +51,6 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add gradlew gradlew.bat gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.properties
             git commit -m "Add Gradle 8.11.1 wrapper"
-            git push
+            git pull --rebase origin main
+            git push origin main
           fi
-
-      - name: Upload Sentinel debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: sentinel-alpha-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
