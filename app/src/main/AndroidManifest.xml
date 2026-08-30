@@ -23,6 +23,10 @@
         <meta-data android:name="sentinel.privacy" android:value="Alpha security scans and reports are processed on-device." />
 
         <activity
+            android:name=".firewall.AppFirewallActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -38,7 +42,10 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="On-device DNS monitoring and local firewall protection" />
+                android:value="On-device DNS monitoring and per-app network blocking" />
+            <meta-data
+                android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
+                android:value="false" />
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>

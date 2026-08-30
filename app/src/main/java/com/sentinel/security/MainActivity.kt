@@ -22,6 +22,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.sentinel.security.databinding.ActivityMainBinding
+import com.sentinel.security.firewall.AppFirewallActivity
+import com.sentinel.security.firewall.AppFirewallStats
+import com.sentinel.security.firewall.AppFirewallStore
 import com.sentinel.security.scanner.ScanResult
 import com.sentinel.security.scanner.SecurityScanner
 import com.sentinel.security.storage.ReportFormatter
@@ -91,12 +94,16 @@ class MainActivity : AppCompatActivity() {
 
         binding.switchFirewall.isChecked = VpnPreferences.mode(this) == VpnMode.FIREWALL
         binding.switchFirewall.setOnCheckedChangeListener { _, enabled ->
-            VpnPreferences.setMode(this, if (enabled) VpnMode.FIREWALL else VpnMode.MONITOR)
+            val previousMode = VpnPreferences.mode(this)
+            val newMode = if (enabled) VpnMode.FIREWALL else VpnMode.MONITOR
+            VpnPreferences.setMode(this, newMode)
             if (VpnPreferences.isRunning(this)) {
-                startService(
-                    Intent(this, SentinelVpnService::class.java)
-                        .setAction(SentinelVpnService.ACTION_REFRESH)
-                )
+                val action = if (previousMode == VpnMode.APP_BLOCK) {
+                    SentinelVpnService.ACTION_RESTART
+                } else {
+                    SentinelVpnService.ACTION_REFRESH
+                }
+                startService(Intent(this, SentinelVpnService::class.java).setAction(action))
             }
             renderVpnState()
         }
@@ -104,6 +111,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnScan.setOnClickListener { runSecurityScan() }
         binding.btnVpn.setOnClickListener {
             if (VpnPreferences.isRunning(this)) stopSentinelVpn() else requestNotificationThenVpn()
+        }
+        binding.btnAppFirewall.setOnClickListener {
+            startActivity(Intent(this, AppFirewallActivity::class.java))
         }
         binding.btnCopyReport.setOnClickListener { copyLatestReport() }
         binding.btnExportReport.setOnClickListener { exportLatestReport() }
@@ -241,9 +251,15 @@ class MainActivity : AppCompatActivity() {
         val mode = VpnPreferences.mode(this)
         val custom = CustomBlocklist.all(this)
         val recentBlocks = VpnPreferences.recentBlocked(this)
+        val appSelection = AppFirewallStore.blockedPackages(this)
+        val appStats = AppFirewallStats.snapshot()
 
         binding.txtVpn.text = if (running) "VPN: ACTIVE" else "VPN: INACTIVE"
-        binding.txtVpnMode.text = "Mode: ${if (mode == VpnMode.FIREWALL) "FIREWALL" else "MONITOR"}"
+        binding.txtVpnMode.text = "Mode: ${when (mode) {
+            VpnMode.MONITOR -> "MONITOR"
+            VpnMode.FIREWALL -> "DNS FIREWALL"
+            VpnMode.APP_BLOCK -> "APP FIREWALL"
+        }}"
         binding.txtDnsQueries.text = "DNS queries observed: ${VpnPreferences.dnsQueries(this)}"
         binding.txtBlocked.text = "Blocked this session: ${VpnPreferences.blocked(this)}"
         binding.txtLastDomain.text = "Last domain: ${VpnPreferences.lastDomain(this).ifBlank { "—" }}"
@@ -257,6 +273,17 @@ class MainActivity : AppCompatActivity() {
         } else {
             "Recent blocks: ${recentBlocks.take(4).joinToString()}"
         }
+
+        val appFirewallActive = running && mode == VpnMode.APP_BLOCK
+        binding.txtAppFirewallSummary.text = buildString {
+            append("${appSelection.size} apps selected")
+            if (appFirewallActive) {
+                append(" • ACTIVE • ${appStats.packetsBlocked} packets dropped")
+            } else {
+                append(" • inactive")
+            }
+        }
+        binding.btnAppFirewall.text = if (appFirewallActive) "MANAGE ACTIVE APP FIREWALL" else "OPEN APP FIREWALL"
         binding.btnVpn.text = if (running) "STOP SENTINEL VPN" else "START SENTINEL VPN"
     }
 

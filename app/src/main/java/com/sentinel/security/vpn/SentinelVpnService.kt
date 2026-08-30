@@ -16,16 +16,20 @@ import android.os.ParcelFileDescriptor
 import androidx.core.app.NotificationCompat
 import com.sentinel.security.MainActivity
 import com.sentinel.security.R
+import com.sentinel.security.firewall.AppBlockPacketLoop
+import com.sentinel.security.firewall.AppFirewallStats
+import com.sentinel.security.firewall.AppFirewallStore
 
 class SentinelVpnService : VpnService() {
 
     private var vpnInterface: ParcelFileDescriptor? = null
     private var dnsProxyLoop: DnsProxyLoop? = null
+    private var appBlockLoop: AppBlockPacketLoop? = null
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, buildNotification("Starting DNS protection…"))
+        startForeground(NOTIFICATION_ID, buildNotification("Starting protection…"))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -34,21 +38,24 @@ class SentinelVpnService : VpnService() {
                 stopSelf()
                 return START_NOT_STICKY
             }
+
             ACTION_REFRESH -> {
                 updateNotification()
                 return START_STICKY
             }
+
+            ACTION_RESTART -> {
+                restartTunnel()
+                return START_STICKY
+            }
         }
 
-        if (vpnInterface == null) startDnsVpn() else updateNotification()
+        if (vpnInterface == null) startTunnelForMode() else updateNotification()
         return START_STICKY
     }
 
     override fun onDestroy() {
-        dnsProxyLoop?.stop()
-        dnsProxyLoop = null
-        runCatching { vpnInterface?.close() }
-        vpnInterface = null
+        stopTunnel()
         VpnPreferences.setRunning(this, false)
         super.onDestroy()
     }
@@ -61,6 +68,20 @@ class SentinelVpnService : VpnService() {
 
     override fun onBind(intent: Intent?): IBinder? = super.onBind(intent)
 
+    private fun restartTunnel() {
+        stopTunnel()
+        startTunnelForMode()
+    }
+
+    private fun startTunnelForMode() {
+        when (VpnPreferences.mode(this)) {
+            VpnMode.MONITOR,
+            VpnMode.FIREWALL -> startDnsVpn()
+
+            VpnMode.APP_BLOCK -> startAppBlockVpn()
+        }
+    }
+
     private fun startDnsVpn() {
         VpnPreferences.resetSessionCounters(this)
 
@@ -68,7 +89,7 @@ class SentinelVpnService : VpnService() {
             .setSession("Sentinel DNS Security")
             .setMtu(1500)
             .setBlocking(true)
-            .addAddress(VPN_ADDRESS, 32)
+            .addAddress(DNS_VPN_ADDRESS, 32)
             .addDnsServer(VIRTUAL_DNS)
             .addRoute(VIRTUAL_DNS, 32)
 
@@ -85,6 +106,60 @@ class SentinelVpnService : VpnService() {
         updateNotification()
     }
 
+    private fun startAppBlockVpn() {
+        val selected = AppFirewallStore.blockedPackages(this)
+        if (selected.isEmpty()) {
+            VpnPreferences.setRunning(this, false)
+            stopSelf()
+            return
+        }
+
+        AppFirewallStats.reset()
+        val builder = Builder()
+            .setSession("Sentinel App Firewall")
+            .setMtu(1500)
+            .setBlocking(true)
+            .addAddress(APP_BLOCK_ADDRESS_V4, 32)
+            .addRoute("0.0.0.0", 0)
+            .addAddress(APP_BLOCK_ADDRESS_V6, 128)
+            .addRoute("::", 0)
+
+        var routedApps = 0
+        selected.forEach { packageName ->
+            runCatching {
+                builder.addAllowedApplication(packageName)
+                routedApps++
+            }
+        }
+
+        if (routedApps == 0) {
+            VpnPreferences.setRunning(this, false)
+            stopSelf()
+            return
+        }
+
+        val established = runCatching { builder.establish() }.getOrNull()
+        if (established == null) {
+            VpnPreferences.setRunning(this, false)
+            stopSelf()
+            return
+        }
+
+        vpnInterface = established
+        appBlockLoop = AppBlockPacketLoop(this, established).also { it.start() }
+        VpnPreferences.setRunning(this, true)
+        updateNotification()
+    }
+
+    private fun stopTunnel() {
+        dnsProxyLoop?.stop()
+        dnsProxyLoop = null
+        appBlockLoop?.stop()
+        appBlockLoop = null
+        runCatching { vpnInterface?.close() }
+        vpnInterface = null
+    }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -92,19 +167,26 @@ class SentinelVpnService : VpnService() {
                 "Sentinel VPN",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Sentinel on-device DNS security monitoring"
+                description = "Sentinel on-device DNS and app firewall protection"
             }
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }
 
     private fun updateNotification() {
-        val mode = when (VpnPreferences.mode(this)) {
-            VpnMode.MONITOR -> "Monitor mode"
-            VpnMode.FIREWALL -> "Firewall mode"
+        val text = when (VpnPreferences.mode(this)) {
+            VpnMode.MONITOR -> "Monitor mode • DNS protection active"
+            VpnMode.FIREWALL -> {
+                val blocked = VpnPreferences.blocked(this)
+                if (blocked > 0) "DNS firewall • $blocked blocked" else "DNS firewall active"
+            }
+            VpnMode.APP_BLOCK -> {
+                val count = AppFirewallStore.blockedPackages(this).size
+                val packets = AppFirewallStats.snapshot().packetsBlocked
+                "App firewall • $count apps • $packets packets dropped"
+            }
         }
-        val blocked = VpnPreferences.blocked(this)
-        val text = if (blocked > 0) "$mode • $blocked blocked" else "$mode • DNS protection active"
+
         getSystemService(NotificationManager::class.java)
             .notify(NOTIFICATION_ID, buildNotification(text))
     }
@@ -130,10 +212,13 @@ class SentinelVpnService : VpnService() {
         const val ACTION_START = "com.sentinel.security.vpn.START"
         const val ACTION_STOP = "com.sentinel.security.vpn.STOP"
         const val ACTION_REFRESH = "com.sentinel.security.vpn.REFRESH"
+        const val ACTION_RESTART = "com.sentinel.security.vpn.RESTART"
 
         private const val CHANNEL_ID = "sentinel_vpn"
         private const val NOTIFICATION_ID = 1001
-        private const val VPN_ADDRESS = "10.10.10.2"
+        private const val DNS_VPN_ADDRESS = "10.10.10.2"
         private const val VIRTUAL_DNS = "10.10.10.1"
+        private const val APP_BLOCK_ADDRESS_V4 = "10.20.0.2"
+        private const val APP_BLOCK_ADDRESS_V6 = "fd00:5345:4e54:494e::2"
     }
 }

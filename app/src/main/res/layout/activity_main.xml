@@ -214,6 +214,55 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="26dp"
+            android:text="PER-APP NETWORK FIREWALL"
+            android:textColor="#38BDF8"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="#0F1B2D"
+            app:cardCornerRadius="18dp"
+            app:strokeColor="#243650"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/txtAppFirewallSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="0 apps selected • inactive"
+                    android:textColor="#CBD5E1"
+                    android:textSize="13sp" />
+
+                <Button
+                    android:id="@+id/btnAppFirewall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="OPEN APP FIREWALL" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:text="Select individual apps and hard-block their IPv4/IPv6 network access. Blocked connection attempts are counted locally."
+                    android:textColor="#64748B"
+                    android:textSize="10sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
             android:text="LOCAL VPN / DNS FIREWALL"
             android:textColor="#38BDF8"
             android:textSize="13sp"
@@ -256,7 +305,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Firewall mode"
+                    android:text="DNS firewall mode"
                     android:textColor="#E2E8F0" />
 
                 <TextView
@@ -351,7 +400,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="This Alpha routes DNS through Sentinel, not full app traffic. Monitor mode records local DNS activity. Firewall mode blocks the reserved test domains plus domains you add above."
+                    android:text="DNS Monitor/Firewall and App Firewall are separate local-VPN modes because Android permits only one active VPN per user. Starting one mode replaces the other."
                     android:textColor="#64748B"
                     android:textSize="10sp" />
             </LinearLayout>

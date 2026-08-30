@@ -7,5 +7,6 @@ package com.sentinel.security.vpn
 
 enum class VpnMode {
     MONITOR,
-    FIREWALL
+    FIREWALL,
+    APP_BLOCK
 }
