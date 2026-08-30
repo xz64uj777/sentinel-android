@@ -1,40 +1,67 @@
 # Sentinel Android v2
 
-Native Android security and privacy monitoring application.
+Native Android security/privacy monitoring app.
 
-Copyright © 2026 Kyle T. All Rights Reserved.
+**Copyright © 2026 Kyle T. All Rights Reserved.**
 
 This repository contains proprietary software. Unauthorized copying, modification, distribution, sublicensing, sale, reverse engineering, or commercial use is prohibited without the express written permission of the copyright owner.
 
-## Alpha 0.2 Test Build
+## Alpha 0.3
 
-- Root, debugger, and emulator checks
-- Installed-app dangerous-permission scan
-- Local security score
-- Android `VpnService` permission and foreground service
-- DNS-only local VPN that does not route normal app traffic into an unfinished tunnel
-- Monitor mode with live DNS query counters
-- Firewall mode with a local reserved-domain test blocklist
-- On-device DNS forwarding to protected upstream resolvers
-- Start/stop VPN controls and foreground notification
-- No server, account, subscription, or paid API required
+Sentinel Alpha 0.3 combines the previously separate scanner and VPN prototypes into one installable Android app.
 
-### Safe firewall test domains
+### On-device security scan
 
-The Alpha firewall only blocks reserved `.test` domains so development cannot accidentally block a real website:
+- Root indicator checks
+- Debugger and emulator/environment checks
+- Developer options and ADB status
+- Secure lock-screen check
+- Android security-patch age review
+- Third-party accessibility-service review
+- Notification-listener review
+- Device-administrator review
+- Installed user-app capability/permission combination scoring
+- Build-profile fingerprint (SHA-256-derived build profile, not a hardware identifier)
+- Severity-ranked findings and recommended actions
+- Last-scan history and recent score trend
+- Copy/export plain-text security report
 
-- `malware.test`
-- `phishing.test`
-- `spyware.test`
-- `tracker.test`
+### Local VPN / DNS firewall
 
-## Build requirements
+- Android `VpnService` foreground service
+- DNS-only tunnel for Alpha stability
+- Monitor mode: observe DNS domains locally
+- Firewall mode: block local rules using NXDOMAIN responses
+- Reserved `.test` domains for safe firewall verification
+- User-defined custom blocked domains stored locally
+- Session DNS/blocked counters and recent-block history
+- Protected upstream DNS socket to prevent VPN recursion
 
-- Android Studio with JDK 17 or newer configured for Gradle
-- Android SDK 35
-- Android Gradle Plugin 8.10.1
-- Gradle 8.11.1
+### Privacy / cost
+
+- No Sentinel account required
+- No cloud backend required
+- No paid API required
+- Scan findings and custom firewall rules are stored/processed on-device
+
+## Important Alpha limitations
+
+- The VPN currently routes DNS only. It is not yet a full TCP/UDP packet firewall.
+- DNS traffic that bypasses the Android resolver (for example some app-controlled encrypted DNS/DoH implementations) may not be visible to this Alpha.
+- App capability findings are risk signals, not proof that an app is malware.
+- `QUERY_ALL_PACKAGES` is used because Sentinel is a security scanner; Play distribution will require the appropriate policy declaration/review.
+- The GitHub Actions APK is a debug-signed test build, not a production release build.
+
+## Build
+
+```bash
+./gradlew assembleDebug
+```
+
+Debug APK output:
+
+```text
+app/build/outputs/apk/debug/app-debug.apk
+```
 
 Package: `com.sentinel.security`
-
-The GitHub Actions workflow builds `app-debug.apk` and bootstraps the Gradle 8.11.1 wrapper if the wrapper is missing.

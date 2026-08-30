@@ -1,183 +1,379 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B1220"
+    android:background="#08111F"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="22dp">
+        android:padding="18dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SENTINEL"
-            android:textColor="#14B8A6"
-            android:textSize="30sp"
+            android:textColor="#38BDF8"
+            android:textSize="31sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/txtVersion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Android Security Monitor • Alpha 0.2"
+            android:text="Android Security Monitor"
             android:textColor="#94A3B8"
             android:textSize="13sp" />
 
-        <TextView
-            android:id="@+id/txtScore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="26dp"
-            android:text="Security Score: --"
-            android:textColor="#FFFFFF"
-            android:textSize="25sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/txtThreats"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Findings: 0"
-            android:textColor="#E2E8F0"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/txtRoot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="Root: Not scanned"
-            android:textColor="#CBD5E1" />
-
-        <TextView
-            android:id="@+id/txtDebug"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
-            android:text="Debugger: Not scanned"
-            android:textColor="#CBD5E1" />
-
-        <TextView
-            android:id="@+id/txtEmulator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
-            android:text="Emulator: Not scanned"
-            android:textColor="#CBD5E1" />
-
-        <TextView
-            android:id="@+id/txtFindingsDetails"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="13dp"
-            android:background="#111C2F"
-            android:padding="12dp"
-            android:text="Run a scan to inspect device security signals."
-            android:textColor="#94A3B8"
-            android:textSize="12sp" />
+            android:layout_marginTop="18dp"
+            app:cardBackgroundColor="#0F1B2D"
+            app:cardCornerRadius="18dp"
+            app:strokeColor="#243650"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SECURITY POSTURE"
+                    android:textColor="#94A3B8"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="--/100"
+                    android:textColor="#FFFFFF"
+                    android:textSize="38sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtPosture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NOT YET SCANNED"
+                    android:textColor="#38BDF8"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtThreats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="0 findings"
+                    android:textColor="#CBD5E1" />
+
+                <TextView
+                    android:id="@+id/txtScanHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Last scan: Never"
+                    android:textColor="#64748B"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="#0F1B2D"
+            app:cardCornerRadius="18dp"
+            app:strokeColor="#243650"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DEVICE &amp; APP SIGNALS"
+                    android:textColor="#38BDF8"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtRoot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Root: Not scanned"
+                    android:textColor="#CBD5E1" />
+
+                <TextView
+                    android:id="@+id/txtDebug"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="Debugger: Not scanned"
+                    android:textColor="#CBD5E1" />
+
+                <TextView
+                    android:id="@+id/txtEmulator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="Environment: Not scanned"
+                    android:textColor="#CBD5E1" />
+
+                <TextView
+                    android:id="@+id/txtIntegrity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Developer options / ADB / lock screen / patch: Not scanned"
+                    android:textColor="#94A3B8"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/txtAppsScanned"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Apps scanned: —"
+                    android:textColor="#94A3B8"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/txtBuildProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Build profile: Not scanned"
+                    android:textColor="#64748B"
+                    android:textIsSelectable="true"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <Button
             android:id="@+id/btnScan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="14dp"
             android:text="RUN SECURITY SCAN" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="26dp"
-            android:background="#233149" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:text="LOCAL VPN / DNS PROTECTION"
-            android:textColor="#14B8A6"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/txtVpn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="VPN: INACTIVE"
-            android:textColor="#FFFFFF"
-            android:textSize="19sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/txtVpnMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Mode: MONITOR"
-            android:textColor="#CBD5E1" />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switchFirewall"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Firewall mode (block Sentinel test domains)"
-            android:textColor="#E2E8F0" />
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCopyReport"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="COPY REPORT" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="1dp" />
+
+            <Button
+                android:id="@+id/btnExportReport"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="EXPORT REPORT" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/txtDnsQueries"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="DNS queries observed: 0"
-            android:textColor="#CBD5E1" />
-
-        <TextView
-            android:id="@+id/txtBlocked"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Blocked this session: 0"
-            android:textColor="#CBD5E1" />
-
-        <TextView
-            android:id="@+id/txtLastDomain"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:ellipsize="middle"
-            android:maxLines="1"
-            android:text="Last domain: —"
-            android:textColor="#CBD5E1" />
-
-        <Button
-            android:id="@+id/btnVpn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="START SENTINEL VPN" />
-
-        <TextView
+            android:id="@+id/txtFindingsDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Alpha 0.2 routes DNS only. Normal app traffic stays outside the tunnel, preventing the unfinished firewall from breaking internet access. Monitor mode observes domains; Firewall mode also blocks the reserved test domains malware.test, phishing.test, spyware.test and tracker.test."
+            android:background="#0B1628"
+            android:padding="13dp"
+            android:text="Run a scan to inspect device and installed-app security signals."
+            android:textColor="#A7B4C6"
+            android:textIsSelectable="true"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:text="LOCAL VPN / DNS FIREWALL"
+            android:textColor="#38BDF8"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="#0F1B2D"
+            app:cardCornerRadius="18dp"
+            app:strokeColor="#243650"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/txtVpn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="VPN: INACTIVE"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtVpnMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Mode: MONITOR"
+                    android:textColor="#CBD5E1" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchFirewall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Firewall mode"
+                    android:textColor="#E2E8F0" />
+
+                <TextView
+                    android:id="@+id/txtDnsQueries"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="DNS queries observed: 0"
+                    android:textColor="#A7B4C6" />
+
+                <TextView
+                    android:id="@+id/txtBlocked"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Blocked this session: 0"
+                    android:textColor="#A7B4C6" />
+
+                <TextView
+                    android:id="@+id/txtLastDomain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="middle"
+                    android:maxLines="1"
+                    android:text="Last domain: —"
+                    android:textColor="#A7B4C6" />
+
+                <EditText
+                    android:id="@+id/inputBlockDomain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:backgroundTint="#38BDF8"
+                    android:hint="Domain to block, e.g. example.com"
+                    android:inputType="textUri"
+                    android:singleLine="true"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#64748B" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnAddDomain"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="ADD DOMAIN" />
+
+                    <Space
+                        android:layout_width="8dp"
+                        android:layout_height="1dp" />
+
+                    <Button
+                        android:id="@+id/btnClearDomains"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="CLEAR CUSTOM" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtCustomBlocks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:text="Custom blocklist: none"
+                    android:textColor="#94A3B8"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/txtRecentBlocks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="Recent blocks: —"
+                    android:textColor="#94A3B8"
+                    android:textSize="11sp" />
+
+                <Button
+                    android:id="@+id/btnVpn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="START SENTINEL VPN" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="This Alpha routes DNS through Sentinel, not full app traffic. Monitor mode records local DNS activity. Firewall mode blocks the reserved test domains plus domains you add above."
+                    android:textColor="#64748B"
+                    android:textSize="10sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="Sentinel reports security signals and risky capability combinations. A finding is not, by itself, proof that an app is malicious. Alpha scans and reports remain on-device."
             android:textColor="#64748B"
-            android:textSize="11sp" />
+            android:textSize="10sp" />
 
         <TextView
             android:id="@+id/txtCopyright"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="34dp"
+            android:layout_marginTop="18dp"
             android:layout_marginBottom="20dp"
             android:gravity="center"
-            android:textColor="#64748B"
-            android:textSize="11sp" />
+            android:textColor="#526177"
+            android:textSize="10sp" />
 
     </LinearLayout>
 </ScrollView>

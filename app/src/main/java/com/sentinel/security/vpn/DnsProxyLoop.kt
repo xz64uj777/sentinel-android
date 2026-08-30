@@ -26,7 +26,6 @@ class DnsProxyLoop(
 
     fun start() {
         if (!running.compareAndSet(false, true)) return
-
         worker = Thread({ runLoop() }, "SentinelDnsProxy").apply {
             isDaemon = true
             start()
@@ -53,7 +52,7 @@ class DnsProxyLoop(
 
                 val parsed = DnsPacketParser.parse(readBuffer, length) ?: continue
                 val firewallMode = VpnPreferences.mode(service) == VpnMode.FIREWALL
-                val blocked = firewallMode && LocalBlocklist.shouldBlock(parsed.domain)
+                val blocked = firewallMode && LocalBlocklist.shouldBlock(service, parsed.domain)
 
                 val dnsResponse = if (blocked) {
                     DnsResponseFactory.nxDomain(parsed.dnsPayload)
@@ -68,9 +67,7 @@ class DnsProxyLoop(
                 output.flush()
             }
         } catch (error: Exception) {
-            if (running.get()) {
-                Log.e(TAG, "DNS proxy stopped unexpectedly", error)
-            }
+            if (running.get()) Log.e(TAG, "DNS proxy stopped unexpectedly", error)
         } finally {
             runCatching { upstreamSocket?.close() }
             upstreamSocket = null
@@ -81,23 +78,16 @@ class DnsProxyLoop(
 
     private fun forwardToUpstream(query: ByteArray): ByteArray? {
         val socket = getOrCreateSocket() ?: return null
-
         for (server in UPSTREAM_DNS) {
             try {
-                val request = DatagramPacket(
-                    query,
-                    query.size,
-                    InetAddress.getByName(server),
-                    53
-                )
+                val request = DatagramPacket(query, query.size, InetAddress.getByName(server), 53)
                 socket.send(request)
-
                 val responseBuffer = ByteArray(4096)
                 val response = DatagramPacket(responseBuffer, responseBuffer.size)
                 socket.receive(response)
                 return response.data.copyOfRange(response.offset, response.offset + response.length)
             } catch (_: SocketTimeoutException) {
-                // Try the next upstream server.
+                // Try the next upstream resolver.
             } catch (error: Exception) {
                 Log.w(TAG, "DNS upstream $server failed: ${error.message}")
             }
@@ -107,7 +97,6 @@ class DnsProxyLoop(
 
     private fun getOrCreateSocket(): DatagramSocket? {
         upstreamSocket?.let { if (!it.isClosed) return it }
-
         return runCatching {
             DatagramSocket().also { socket ->
                 socket.soTimeout = 2_500

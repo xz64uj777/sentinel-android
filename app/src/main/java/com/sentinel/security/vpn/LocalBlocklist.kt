@@ -5,19 +5,22 @@
  */
 package com.sentinel.security.vpn
 
+import android.content.Context
+
 object LocalBlocklist {
-    // Reserved .test domains are intentionally used so Alpha testing never blocks a real site.
-    private val blockedDomains = setOf(
+    // Reserved .test domains are included so firewall behavior can be verified safely.
+    private val builtInTestDomains = setOf(
         "malware.test",
         "phishing.test",
         "spyware.test",
         "tracker.test"
     )
 
-    fun shouldBlock(domain: String): Boolean {
+    fun shouldBlock(context: Context, domain: String): Boolean {
         val normalized = domain.trimEnd('.').lowercase()
-        return blockedDomains.any { blocked ->
+        val builtInMatch = builtInTestDomains.any { blocked ->
             normalized == blocked || normalized.endsWith(".$blocked")
         }
+        return builtInMatch || CustomBlocklist.contains(context, normalized)
     }
 }

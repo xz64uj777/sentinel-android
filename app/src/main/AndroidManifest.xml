@@ -10,13 +10,17 @@
 
     <application
         android:allowBackup="false"
+        android:icon="@drawable/ic_sentinel"
+        android:roundIcon="@drawable/ic_sentinel"
         android:label="Sentinel"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Sentinel">
+        android:theme="@style/Theme.Sentinel"
+        android:usesCleartextTraffic="false">
 
         <meta-data android:name="sentinel.owner" android:value="Kyle T." />
         <meta-data android:name="sentinel.product" android:value="Sentinel Android v2" />
         <meta-data android:name="sentinel.copyright" android:value="Copyright © 2026 Kyle T. All Rights Reserved." />
+        <meta-data android:name="sentinel.privacy" android:value="Alpha security scans and reports are processed on-device." />
 
         <activity
             android:name=".MainActivity"

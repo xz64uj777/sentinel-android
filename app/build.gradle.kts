@@ -11,8 +11,8 @@ android {
         applicationId = "com.sentinel.security"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0-alpha"
+        versionCode = 3
+        versionName = "0.3.0-alpha"
 
         buildConfigField("String", "COPYRIGHT_OWNER", "\"Kyle T.\"")
         buildConfigField("String", "COPYRIGHT_NOTICE", "\"Copyright © 2026 Kyle T. All Rights Reserved.\"")

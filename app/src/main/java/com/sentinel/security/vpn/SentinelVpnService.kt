@@ -15,6 +15,7 @@ import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import androidx.core.app.NotificationCompat
 import com.sentinel.security.MainActivity
+import com.sentinel.security.R
 
 class SentinelVpnService : VpnService() {
 
@@ -39,11 +40,7 @@ class SentinelVpnService : VpnService() {
             }
         }
 
-        if (vpnInterface == null) {
-            startDnsVpn()
-        } else {
-            updateNotification()
-        }
+        if (vpnInterface == null) startDnsVpn() else updateNotification()
         return START_STICKY
     }
 
@@ -70,10 +67,10 @@ class SentinelVpnService : VpnService() {
         val builder = Builder()
             .setSession("Sentinel DNS Security")
             .setMtu(1500)
+            .setBlocking(true)
             .addAddress(VPN_ADDRESS, 32)
             .addDnsServer(VIRTUAL_DNS)
             .addRoute(VIRTUAL_DNS, 32)
-            .setBlocking(true)
 
         val established = runCatching { builder.establish() }.getOrNull()
         if (established == null) {
@@ -106,14 +103,16 @@ class SentinelVpnService : VpnService() {
             VpnMode.MONITOR -> "Monitor mode"
             VpnMode.FIREWALL -> "Firewall mode"
         }
+        val blocked = VpnPreferences.blocked(this)
+        val text = if (blocked > 0) "$mode • $blocked blocked" else "$mode • DNS protection active"
         getSystemService(NotificationManager::class.java)
-            .notify(NOTIFICATION_ID, buildNotification("$mode • DNS protection active"))
+            .notify(NOTIFICATION_ID, buildNotification(text))
     }
 
     private fun buildNotification(status: String) = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("Sentinel Android v2")
         .setContentText(status)
-        .setSmallIcon(android.R.drawable.ic_lock_lock)
+        .setSmallIcon(R.drawable.ic_sentinel_notification)
         .setOngoing(true)
         .setOnlyAlertOnce(true)
         .setCategory(NotificationCompat.CATEGORY_SERVICE)

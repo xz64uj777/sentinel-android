@@ -6,33 +6,89 @@
 package com.sentinel.security.scanner
 
 import android.content.Context
+import com.sentinel.security.model.SecurityFinding
+import com.sentinel.security.model.Severity
 
 data class ScanResult(
+    val timestamp: Long,
     val rooted: Boolean,
     val debugger: Boolean,
     val emulator: Boolean,
     val score: Int,
-    val findings: List<String>
-)
+    val integrity: DeviceIntegrityResult,
+    val specialAccess: SpecialAccessResult,
+    val appScan: InstalledAppScanResult,
+    val buildProfile: BuildProfile,
+    val findings: List<SecurityFinding>
+) {
+    val criticalCount: Int get() = findings.count { it.severity == Severity.CRITICAL }
+    val highCount: Int get() = findings.count { it.severity == Severity.HIGH }
+    val mediumCount: Int get() = findings.count { it.severity == Severity.MEDIUM }
+}
 
 class SecurityScanner {
     fun runScan(context: Context): ScanResult {
         val rooted = RootDetector.isRooted()
         val debugger = DebugDetector.isDebuggerAttached()
         val emulator = EmulatorDetector.isEmulator()
+        val integrity = DeviceIntegrityScanner.scan(context)
+        val specialAccess = SpecialAccessScanner.scan(context)
+        val appScan = InstalledAppScanner.scan(context, specialAccess)
+        val buildProfile = BuildProfileScanner.read()
 
-        val findings = mutableListOf<String>()
-        if (rooted) findings += "Root access detected"
-        if (debugger) findings += "Debugger connected"
-        if (emulator) findings += "Emulated environment detected"
-        findings += PermissionScanner().scan(context)
+        val findings = mutableListOf<SecurityFinding>()
 
-        var score = 100
-        if (rooted) score -= 35
-        if (debugger) score -= 20
-        if (emulator) score -= 10
-        score -= findings.count { it.startsWith("Risky permission") } * 3
+        if (rooted) {
+            findings += SecurityFinding(
+                title = "Root indicators detected",
+                description = "Sentinel found common root/su indicators on the device.",
+                severity = Severity.HIGH,
+                category = "Device integrity",
+                recommendation = "If you did not intentionally root this device, investigate before using it for sensitive accounts."
+            )
+        }
+        if (debugger) {
+            findings += SecurityFinding(
+                title = "Debugger currently attached",
+                description = "A debugger is attached to the Sentinel process.",
+                severity = Severity.MEDIUM,
+                category = "Runtime",
+                recommendation = "Disconnect debugging tools when normal testing is complete."
+            )
+        }
+        if (emulator) {
+            findings += SecurityFinding(
+                title = "Emulated environment indicators",
+                description = "Build properties resemble an emulator or virtual Android device.",
+                severity = Severity.INFO,
+                category = "Environment",
+                recommendation = "No action is needed when you intentionally run Sentinel in an emulator."
+            )
+        }
 
-        return ScanResult(rooted, debugger, emulator, score.coerceIn(0, 100), findings)
+        findings += integrity.findings
+        findings += specialAccess.findings
+        findings += appScan.findings
+
+        val ordered = findings.sortedWith(
+            compareByDescending<SecurityFinding> { it.severity.ordinal }
+                .thenBy { it.category }
+                .thenBy { it.title }
+        )
+        val penalty = ordered.sumOf { it.severity.scorePenalty }.coerceAtMost(100)
+        val score = (100 - penalty).coerceIn(0, 100)
+
+        return ScanResult(
+            timestamp = System.currentTimeMillis(),
+            rooted = rooted,
+            debugger = debugger,
+            emulator = emulator,
+            score = score,
+            integrity = integrity,
+            specialAccess = specialAccess,
+            appScan = appScan,
+            buildProfile = buildProfile,
+            findings = ordered
+        )
     }
 }

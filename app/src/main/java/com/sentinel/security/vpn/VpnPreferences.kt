@@ -14,6 +14,7 @@ object VpnPreferences {
     private const val KEY_DNS_QUERIES = "dns_queries"
     private const val KEY_BLOCKED = "blocked"
     private const val KEY_LAST_DOMAIN = "last_domain"
+    private const val KEY_RECENT_BLOCKS = "recent_blocks"
 
     fun isRunning(context: Context): Boolean = prefs(context).getBoolean(KEY_RUNNING, false)
 
@@ -36,6 +37,7 @@ object VpnPreferences {
             .putLong(KEY_DNS_QUERIES, 0)
             .putLong(KEY_BLOCKED, 0)
             .putString(KEY_LAST_DOMAIN, "")
+            .putString(KEY_RECENT_BLOCKS, "")
             .apply()
     }
 
@@ -44,11 +46,18 @@ object VpnPreferences {
         val p = prefs(context)
         val dnsCount = p.getLong(KEY_DNS_QUERIES, 0) + 1
         val blockedCount = p.getLong(KEY_BLOCKED, 0) + if (blocked) 1 else 0
-        p.edit()
+        val editor = p.edit()
             .putLong(KEY_DNS_QUERIES, dnsCount)
             .putLong(KEY_BLOCKED, blockedCount)
             .putString(KEY_LAST_DOMAIN, domain)
-            .apply()
+
+        if (blocked) {
+            val recent = recentBlocked(context).toMutableList()
+            recent.remove(domain)
+            recent.add(0, domain)
+            editor.putString(KEY_RECENT_BLOCKS, recent.take(8).joinToString("|||"))
+        }
+        editor.apply()
     }
 
     fun dnsQueries(context: Context): Long = prefs(context).getLong(KEY_DNS_QUERIES, 0)
@@ -56,6 +65,13 @@ object VpnPreferences {
     fun blocked(context: Context): Long = prefs(context).getLong(KEY_BLOCKED, 0)
 
     fun lastDomain(context: Context): String = prefs(context).getString(KEY_LAST_DOMAIN, "") ?: ""
+
+    fun recentBlocked(context: Context): List<String> = prefs(context)
+        .getString(KEY_RECENT_BLOCKS, "")
+        .orEmpty()
+        .split("|||")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
