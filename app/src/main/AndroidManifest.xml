@@ -12,7 +12,7 @@
         android:allowBackup="false"
         android:icon="@drawable/ic_sentinel"
         android:roundIcon="@drawable/ic_sentinel"
-        android:label="Sentinel"
+        android:label="Sentinel Alpha"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sentinel"
         android:usesCleartextTraffic="false">
