@@ -11,11 +11,20 @@ android {
         applicationId = "com.sentinel.security"
         minSdk = 24
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.4.0-alpha"
+        versionCode = 5
+        versionName = "0.4.1-alpha"
 
         buildConfigField("String", "COPYRIGHT_OWNER", "\"Kyle T.\"")
         buildConfigField("String", "COPYRIGHT_NOTICE", "\"Copyright © 2026 Kyle T. All Rights Reserved.\"")
+    }
+
+    buildTypes {
+        getByName("debug") {
+            // Separate debug identity so this APK installs alongside older Sentinel builds
+            // instead of Android treating it as an update signed by a different debug key.
+            applicationIdSuffix = ".fresh"
+            versionNameSuffix = "-fresh"
+        }
     }
 
     buildFeatures {
